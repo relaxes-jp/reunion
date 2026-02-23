@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>同窓会名簿入力</title>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        input, select, textarea { width: 100%; margin-bottom: 15px; padding: 10px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #06C755; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h3>同窓会名簿 入力・更新</h3>
+    <form id="form">
+        <label>氏名</label>
+        <input type="text" id="name" required>
+        
+        <label>旧姓</label>
+        <input type="text" id="oldName">
+        
+        <label>あの頃の所属</label>
+        <select id="affiliation">
+            <option value="社員">社員</option>
+            <option value="直バイ">直バイ</option>
+            <option value="派遣[HS]">派遣[HS]</option>
+            <option value="派遣[AZ]">派遣[AZ]</option>
+            <option value="派遣[NS]">派遣[NS]</option>
+        </select>
+        
+        <label>近況報告</label>
+        <textarea id="message" rows="4" required></textarea>
+        
+        <button type="submit">名簿を保存・更新する</button>
+    </form>
+
+    <button type="button" id="downloadBtn" style="background: #555; margin-top: 10px;">名簿PDFをダウンロード</button>
+
+    <script>
+        // LIFF IDを入れてください
+        const MY_LIFF_ID = 'YOUR_LIFF_ID';
+        // GASのウェブアプリURLを入れてください
+        const GAS_WEB_APP_URL = 'YOUR_GAS_WEB_APP_URL';
+
+        async function main() {
+            await liff.init({ liffId: MY_LIFF_ID });
+            if (!liff.isLoggedIn()) {
+                liff.login();
+            }
+        }
+        main();
+
+	document.getElementById('form').addEventListener('submit', async (e) => {
+	    e.preventDefault();
+	    
+	    // プロフィール情報の取得
+	    const profile = await liff.getProfile(); 
+	    
+	    const formData = {
+	        userId: profile.userId,
+	        lineName: profile.displayName, // LINEの表示名を取得
+	        name: document.getElementById('name').value,
+	        oldName: document.getElementById('oldName').value,
+	        affiliation: document.getElementById('affiliation').value,
+	        message: document.getElementById('message').value
+	    };
+
+	    // GASへデータ送信
+	    const response = await fetch(GAS_WEB_APP_URL, {
+	        method: 'POST',
+	        headers: {
+	            'Content-Type': 'text/plain' // GASのdoPostで受け取るための設定
+	        },
+	        body: JSON.stringify(formData)
+	    });
+
+	    if (response.ok) {
+	        alert('保存が完了しました！グループへ通知しました。');
+	        liff.closeWindow();
+	    } else {
+	        alert('エラーが発生しました。');
+	    }
+	});
+
+	document.getElementById('downloadBtn').addEventListener('click', async () => {
+	    const check = confirm('最新の名簿PDFを生成します。よろしいですか？');
+	    if (!check) return;
+
+	    // GASへPDF生成を依頼（fetchでtypeなどを指定して送る実装が必要）
+	    // 生成されたURLを window.open(url) で開く
+	    alert('生成機能は現在実装中です');
+	});
+    </script>
+</body>
+</html>
