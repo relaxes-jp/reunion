@@ -31,6 +31,11 @@
         
         <label>近況報告</label>
         <textarea id="message" rows="4" required></textarea>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="notify" name="notify">
+            <label for="notify">内容をグループ内に通知する</label>
+        </div>
         
         <button type="submit">名簿を保存・更新する</button>
     </form>
@@ -39,9 +44,9 @@
 
     <script>
         // LIFF IDを入れてください
-        const MY_LIFF_ID = 'YOUR_LIFF_ID';
+        const MY_LIFF_ID = '2009200501-caMtwvTZ';
         // GASのウェブアプリURLを入れてください
-        const GAS_WEB_APP_URL = 'YOUR_GAS_WEB_APP_URL';
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwGgEqEC8lclUn6OBid-snBEPxkgwJr7vzgPOhuPzoHBdV7jj3bt1o80p8hR5sSxEd1uQ/exec';
 
         async function main() {
             await liff.init({ liffId: MY_LIFF_ID });
@@ -63,7 +68,8 @@
 	        name: document.getElementById('name').value,
 	        oldName: document.getElementById('oldName').value,
 	        affiliation: document.getElementById('affiliation').value,
-	        message: document.getElementById('message').value
+	        message: document.getElementById('message').value,
+            notify: document.getElementById('notify').value
 	    };
 
 	    // GASへデータ送信
