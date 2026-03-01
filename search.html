@@ -122,7 +122,7 @@
                 const sLine = document.getElementById('searchLineName').value.toLowerCase();
 
                 console.log("sName:"+sName+" sOld:"+sOld+" sLine:"+sLine);
-                const filtered = [];
+                let filtered = [];
                 // 検索窓が全て空なら、リストをクリア
                 if (!sName && !sOld && !sLine) {
                     filtered = [];
