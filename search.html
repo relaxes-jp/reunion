@@ -122,8 +122,11 @@
                 const sLine = document.getElementById('searchLineName').value.toLowerCase();
 
                 console.log("sName:"+sName+" sOld:"+sOld+" sLine:"+sLine);
-                // 全ての入力欄が空なら、このデータは表示しない（結果的にリストが空になる）
-                if (!sName && !sOld && !sLine) return false;
+                // 検索窓が全て空なら、リストをクリアして終了
+                if (!sName && !sOld && !sLine) {
+                    renderList([]);
+                    return;
+                }
 
                 // いずれかの入力にヒットすれば表示
                 const filtered = allMembers.filter(m => {
