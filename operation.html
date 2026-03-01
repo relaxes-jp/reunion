@@ -17,6 +17,7 @@
 </head>
 <body>
     <h3>リーガ同窓会名簿 入力・更新</h3>
+    <p><b font-color="red">※更新の場合は情報取得されるまでしばらくお待ちください。</b></p>
     <form id="form">
         <label class="required">氏名</label>
         <input type="text" id="name" required>
@@ -120,8 +121,22 @@
             });
 
             if (response.ok) {
-                alert('保存が完了しました！グループへ通知しました。');
-                liff.closeWindow();
+                // 1. LINEアプリ内かどうかをチェック
+                if (!liff.isInClient()) {
+                    alert('保存完了！(外部ブラウザのため、この画面は手動で閉じてください)');
+                } else {
+                    if (document.getElementById('notify').value === 'true') {
+                        alert('保存が完了しました！グループへの通知が完了しました。');
+                    } else {
+                        alert('保存が完了しました！グループへの通知はスキップされています。');
+                    }
+                    try {
+                        liff.closeWindow();
+                    } catch (err) {
+                        console.error('closeWindowでエラーが発生:', err);
+                        alert('画面を閉じられませんでした。手動で閉じてください。');
+                    }
+                }
             } else {
                 alert('エラーが発生しました。');
             }
