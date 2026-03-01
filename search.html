@@ -66,11 +66,14 @@
                     return;
                 }
 
-                allMembers = result.data;
+                allMembers = result.data || [];
+                console.log("Processed allMembers:", allMembers);
+
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
                 
-                renderList(allMembers);
+                // 初期表示では検索結果欄は表示させないため、空のデータを渡す。
+                renderList([]);
 
             } catch (e) {
                 document.getElementById('loading').innerText = "データの取得に失敗しました。";
@@ -88,9 +91,13 @@
             const sOld = document.getElementById('searchOldName').value;
             const sLine = document.getElementById('searchLineName').value;
 
-            if (members.length === 0 && !sName && !sOld && !sLine) {
+            if (members.length === 0) {
                 countBox.innerText = "";
-                list.innerHTML = '<div style="text-align:center; color:#888; margin-top:20px;">名前、旧姓、LINE名のいずれか入力して検索してください</div>';
+                if (!sName && !sOld && !sLine) {
+                    list.innerHTML = '<div style="text-align:center; color:#888; margin-top:20px;">名前、旧姓、LINE名のいずれか入力して検索してください</div>';
+                } else {
+                    list.innerHTML = '<div style="text-align:center; color:#888; margin-top:20px;">該当するメンバーが見つかりません</div>';
+                }
                 return;
             }
 
@@ -109,6 +116,7 @@
         // 検索入力イベントの設定
         ['searchName', 'searchOldName', 'searchLineName'].forEach(id => {
             document.getElementById(id).addEventListener('input', () => {
+                console.log("EventListener input allMembers:", allMembers);
                 const sName = document.getElementById('searchName').value.toLowerCase();
                 const sOld = document.getElementById('searchOldName').value.toLowerCase();
                 const sLine = document.getElementById('searchLineName').value.toLowerCase();
