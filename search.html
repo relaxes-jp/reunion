@@ -113,6 +113,7 @@
                 const sOld = document.getElementById('searchOldName').value.toLowerCase();
                 const sLine = document.getElementById('searchLineName').value.toLowerCase();
 
+                console.log("sName:"+sName+" sOld:"+sOld+" sLine:"+sLine);
                 // 全ての入力欄が空なら、このデータは表示しない（結果的にリストが空になる）
                 if (!sName && !sOld && !sLine) return false;
 
@@ -122,6 +123,7 @@
                         (sOld && (m.oldName || "").toLowerCase().includes(sOld)) ||
                         (sLine && (m.lineName || "").toLowerCase().includes(sLine));
                 });
+                console.log("filtered:", filtered);
                 renderList(filtered);
             });
         });
