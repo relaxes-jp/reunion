@@ -79,6 +79,7 @@
 
         // リストを表示する関数
         function renderList(members) {
+            console.log("renderList:", members);
             const list = document.getElementById('resultList');
             const countBox = document.getElementById('resultCount');
 
@@ -102,6 +103,7 @@
                     <div class="message-box">近況報告: ${m.message}</div>
                 </div>
             `).join('');
+            console.log("list.innerHTML:", list.innerHTML);
         }
 
         // 検索入力イベントの設定
