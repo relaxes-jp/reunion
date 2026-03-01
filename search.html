@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>名簿検索</title>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script src="common.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        #searchBox { width: 100%; padding: 10px; margin-bottom: 20px; }
+        .member-card { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
+        .name { font-weight: bold; color: blue; }
+    </style>
+</head>
+<body>
+    <h3>名簿検索</h3>
+    <input type="text" id="searchBox" placeholder="名前で検索...">
+    <div id="resultList">読み込み中...</div>
+
+    <script>
+        const MY_LIFF_ID = '2009269535-5JcGpiQO';
+
+        async function main() {
+            await liff.init({ liffId: MY_LIFF_ID });
+            // GASから全件取得するリクエストを想定
+            try {
+                const response = await postToGas({ reqType: 'getAllData' });
+                const result = await response.json();
+                renderList(result.data);
+            } catch (e) { document.getElementById('resultList').innerText = "取得失敗"; }
+        }
+        
+        function renderList(data) {
+            const list = document.getElementById('resultList');
+            list.innerHTML = data.map(m => `
+                <div class="member-card">
+                    <div class="name">${m.name} (${m.affiliation})</div>
+                    <div>${m.message}</div>
+                </div>
+            `).join('');
+        }
+        main();
+    </script>
+</body>
+</html>
