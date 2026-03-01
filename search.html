@@ -122,18 +122,18 @@
                 const sLine = document.getElementById('searchLineName').value.toLowerCase();
 
                 console.log("sName:"+sName+" sOld:"+sOld+" sLine:"+sLine);
-                // 検索窓が全て空なら、リストをクリアして終了
+                const filtered = [];
+                // 検索窓が全て空なら、リストをクリア
                 if (!sName && !sOld && !sLine) {
-                    renderList([]);
-                    return;
+                    filtered = [];
+                } else {
+                    // いずれかの入力にヒットすれば表示
+                    filtered = allMembers.filter(m => {
+                        return (sName && (m.name || "").toLowerCase().includes(sName)) ||
+                            (sOld && (m.oldName || "").toLowerCase().includes(sOld)) ||
+                            (sLine && (m.lineName || "").toLowerCase().includes(sLine));
+                    });
                 }
-
-                // いずれかの入力にヒットすれば表示
-                const filtered = allMembers.filter(m => {
-                    return (sName && (m.name || "").toLowerCase().includes(sName)) ||
-                        (sOld && (m.oldName || "").toLowerCase().includes(sOld)) ||
-                        (sLine && (m.lineName || "").toLowerCase().includes(sLine));
-                });
                 console.log("filtered:", filtered);
                 renderList(filtered);
             });
