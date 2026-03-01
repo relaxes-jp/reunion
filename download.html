@@ -3,42 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>名簿PDF出力</title>
+    <title>名簿ダウンロード</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script src="common.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 40px 20px; text-align: center; }
-        .btn { padding: 20px; background: #555; color: white; border: none; border-radius: 5px; width: 100%; font-size: 1.1em; }
+        body { font-family: sans-serif; text-align: center; padding: 40px 20px; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn-pdf { background: #E33E33; color: white; padding: 20px; border: none; border-radius: 8px; width: 100%; font-size: 1.1em; cursor: pointer; }
+        .btn-pdf:disabled { background: #ccc; }
     </style>
 </head>
 <body>
-    <h3>名簿PDFのダウンロード</h3>
-    <p>最新のデータを集計してPDFを作成します。</p>
-    <button class="btn" id="downloadBtn">PDFを生成してダウンロード</button>
-
+    <div class="card">
+        <h3>名簿PDF出力</h3>
+        <p>最新の名簿データをPDFにしてダウンロードします。</p>
+        <button id="downloadBtn" class="btn-pdf">PDFを作成する</button>
+        <div id="statusMsg" style="margin-top:20px; color:#666;"></div>
+    </div>
     <script>
         const MY_LIFF_ID = '2009269538-s27MR4OG';
-
+        async function main() {
+            await liff.init({ liffId: MY_LIFF_ID });
+            if (!liff.isLoggedIn()) { liff.login(); return; }
+        }
         document.getElementById('downloadBtn').addEventListener('click', async () => {
             const btn = document.getElementById('downloadBtn');
+            const msg = document.getElementById('statusMsg');
+            const profile = await liff.getProfile();
             btn.disabled = true;
-            btn.innerText = "生成中...";
-
+            btn.innerText = "作成中...";
+            msg.innerText = "15秒ほどかかる場合があります。";
             try {
-                const response = await postToGas({ reqType: 'generatePDF' });
+                const response = await postToGas({ reqType: 'generatePDF', viewerUserId: profile.userId });
                 const result = await response.json();
-                if (result.pdfUrl) {
-                    window.open(result.pdfUrl, '_blank');
-                    closeLiff("PDFの生成が完了しました！");
+                if (result.status === 'unregistered') {
+                    alert('名簿登録者のみ利用可能です。');
+                    liff.closeWindow();
+                } else if (result.status === 'success') {
+                    window.location.href = result.pdfUrl;
+                    msg.innerText = "作成完了！";
+                    setTimeout(() => liff.closeWindow(), 3000);
                 }
             } catch (e) {
-                alert("生成に失敗しました。");
+                alert("エラーが発生しました。");
                 btn.disabled = false;
-                btn.innerText = "PDFを生成してダウンロード";
+                btn.innerText = "PDFを作成する";
             }
         });
-
-        liff.init({ liffId: MY_LIFF_ID });
+        main();
     </script>
 </body>
 </html>

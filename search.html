@@ -7,39 +7,121 @@
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script src="common.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        #searchBox { width: 100%; padding: 10px; margin-bottom: 20px; }
-        .member-card { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
-        .name { font-weight: bold; color: blue; }
+        body { font-family: sans-serif; padding: 20px; background-color: #f4f7f6; }
+        .search-container { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        input { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        label { font-size: 0.85em; font-weight: bold; color: #555; }
+        .member-card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 5px solid #06C755; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .name-row { font-weight: bold; font-size: 1.1em; color: #333; }
+        .sub-info { font-size: 0.85em; color: #666; margin-top: 4px; }
+        .message-box { margin-top: 8px; font-size: 0.95em; color: #444; border-top: 1px dashed #eee; padding-top: 8px; }
+        #loading { text-align: center; color: #888; margin-top: 50px; }
     </style>
 </head>
 <body>
-    <h3>名簿検索</h3>
-    <input type="text" id="searchBox" placeholder="名前で検索...">
-    <div id="resultList">読み込み中...</div>
+    <h3 style="color: blue; font-weight: bold;">同窓会名簿 検索</h3>
+
+    <div id="loading">読み込み中...</div>
+
+    <div id="mainContent" style="display: none;">
+        <div class="search-container">
+            <label>名前で検索</label>
+            <input type="text" id="searchName" placeholder="氏名を入力...">
+            
+            <label>旧姓で検索</label>
+            <input type="text" id="searchOldName" placeholder="旧姓を入力...">
+            
+            <label>LINE名で検索</label>
+            <input type="text" id="searchLineName" placeholder="LINEの表示名を入力...">
+        </div>
+
+        <div id="resultCount" style="font-size: 0.8em; color: #888; margin-bottom: 10px;"></div>
+        <div id="resultList"></div>
+    </div>
 
     <script>
         const MY_LIFF_ID = '2009269535-5JcGpiQO';
+        let allMembers = []; // 全データを保持する変数
 
         async function main() {
             await liff.init({ liffId: MY_LIFF_ID });
-            // GASから全件取得するリクエストを想定
+            if (!liff.isLoggedIn()) { liff.login(); return; }
+
+            const profile = await liff.getProfile();
+
             try {
-                const response = await postToGas({ reqType: 'getAllData' });
+                // 1. 登録済みかチェック ＆ 全データ取得
+                // GAS側でreqType: 'getAllData'時に、送信者のuserIdが名簿にあるか確認するロジックを想定
+                const response = await postToGas({ 
+                    reqType: 'getAllData', 
+                    viewerUserId: profile.userId 
+                });
                 const result = await response.json();
-                renderList(result.data);
-            } catch (e) { document.getElementById('resultList').innerText = "取得失敗"; }
+
+                if (result.status === 'unregistered') {
+                    alert('名簿未登録の方は検索機能を利用できません。まずは「登録・更新」から登録をお願いします。');
+                    liff.closeWindow();
+                    return;
+                }
+
+                allMembers = result.data;
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                
+                renderList(allMembers);
+
+            } catch (e) {
+                document.getElementById('loading').innerText = "データの取得に失敗しました。";
+            }
         }
-        
-        function renderList(data) {
+
+        // リストを表示する関数
+        function renderList(members) {
             const list = document.getElementById('resultList');
-            list.innerHTML = data.map(m => `
+            const countBox = document.getElementById('resultCount');
+
+            // 検索前の状態（リストが0件かつ入力が空の場合）
+            const sName = document.getElementById('searchName').value;
+            const sOld = document.getElementById('searchOldName').value;
+            const sLine = document.getElementById('searchLineName').value;
+
+            if (members.length === 0 && !sName && !sOld && !sLine) {
+                countBox.innerText = "";
+                list.innerHTML = '<div style="text-align:center; color:#888; margin-top:20px;">名前、旧姓、LINE名のいずれか入力して検索してください</div>';
+                return;
+            }
+
+            countBox.innerText = `該当者: ${members.length} 名`;
+            
+            list.innerHTML = members.map(m => `
                 <div class="member-card">
-                    <div class="name">${m.name} (${m.affiliation})</div>
-                    <div>${m.message}</div>
+                    <div class="name-row">${m.name} <span style="font-size: 0.8em; font-weight: normal;">(${m.affiliation})</span></div>
+                    <div class="sub-info">旧姓: ${m.oldName || 'なし'} / LINE名: ${m.lineName || '不明'}</div>
+                    <div class="message-box">近況報告: ${m.message}</div>
                 </div>
             `).join('');
         }
+
+        // 検索入力イベントの設定
+        ['searchName', 'searchOldName', 'searchLineName'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                const sName = document.getElementById('searchName').value.toLowerCase();
+                const sOld = document.getElementById('searchOldName').value.toLowerCase();
+                const sLine = document.getElementById('searchLineName').value.toLowerCase();
+
+                // 全ての入力欄が空なら、このデータは表示しない（結果的にリストが空になる）
+                if (!sName && !sOld && !sLine) return false;
+
+                // いずれかの入力にヒットすれば表示
+                const filtered = allMembers.filter(m => {
+                    return (sName && (m.name || "").toLowerCase().includes(sName)) ||
+                        (sOld && (m.oldName || "").toLowerCase().includes(sOld)) ||
+                        (sLine && (m.lineName || "").toLowerCase().includes(sLine));
+                });
+                renderList(filtered);
+            });
+        });
+
         main();
     </script>
 </body>
