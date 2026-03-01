@@ -14,7 +14,7 @@
         .member-card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 5px solid #06C755; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .name-row { font-weight: bold; font-size: 1.1em; color: #333; }
         .sub-info { font-size: 0.85em; color: #666; margin-top: 4px; }
-        .message-box { margin-top: 8px; font-size: 0.95em; color: #444; border-top: 1px dashed #eee; padding-top: 8px; }
+        .message-box { margin-top: 8px; font-size: 0.95em; color: #444; border-top: 1px dashed #eee; padding-top: 8px; white-space: pre-wrap;}
         #loading { text-align: center; color: #888; margin-top: 50px; }
     </style>
 </head>
@@ -105,8 +105,8 @@
             
             list.innerHTML = members.map(m => `
                 <div class="member-card">
-                    <div class="name-row">${m.name} <span style="font-size: 0.8em; font-weight: normal;">(${m.affiliation})</span></div>
-                    <div class="sub-info">旧姓: ${m.oldName || 'なし'} / LINE名: ${m.lineName || '不明'}</div>
+                    <div class="name-row">${m.lineName} <span style="font-size: 0.8em; font-weight: normal;">(${m.affiliation})</span></div>
+                    <div class="sub-info">氏名: ${m.name || '不明'} / 旧姓: ${m.oldName || 'なし'}</div>
                     <div class="message-box">近況報告: ${m.message}</div>
                 </div>
             `).join('');
