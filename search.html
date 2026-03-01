@@ -48,6 +48,7 @@
             if (!liff.isLoggedIn()) { liff.login(); return; }
 
             const profile = await liff.getProfile();
+            console.log("Logged in User:", profile.userId);
 
             try {
                 // 1. 登録済みかチェック ＆ 全データ取得
@@ -57,6 +58,7 @@
                     viewerUserId: profile.userId 
                 });
                 const result = await response.json();
+                console.log("GAS Response:", result);
 
                 if (result.status === 'unregistered') {
                     alert('名簿未登録の方は検索機能を利用できません。まずは「登録・更新」から登録をお願いします。');
