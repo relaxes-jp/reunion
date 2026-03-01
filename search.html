@@ -105,8 +105,9 @@
             
             list.innerHTML = members.map(m => `
                 <div class="member-card">
-                    <div class="name-row">${m.lineName} <span style="font-size: 0.8em; font-weight: normal;">(${m.affiliation})</span></div>
+                    <div class="name-row">${m.lineName}</div>
                     <div class="sub-info">氏名: ${m.name || '不明'} / 旧姓: ${m.oldName || 'なし'}</div>
+                    <div class="sub-info">あの頃の所属: ${m.affiliation || '不明'}</div>
                     <div class="message-box">近況報告: ${m.message}</div>
                 </div>
             `).join('');
