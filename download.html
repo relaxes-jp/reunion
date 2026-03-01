@@ -36,10 +36,12 @@
             try {
                 const response = await postToGas({ reqType: 'generatePDF', viewerUserId: profile.userId });
                 const result = await response.json();
+                console.log("result:", result);
                 if (result.status === 'unregistered') {
                     alert('名簿登録者のみ利用可能です。');
                     liff.closeWindow();
                 } else if (result.status === 'success') {
+                    console.log("result.pdfUrl:", result.pdfUrl);
                     window.location.href = result.pdfUrl;
                     msg.innerText = "作成完了！";
                     setTimeout(() => liff.closeWindow(), 3000);
