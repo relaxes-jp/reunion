@@ -42,8 +42,12 @@
                     liff.closeWindow();
                 } else if (result.status === 'success') {
                     console.log("result.pdfUrl:", result.pdfUrl);
-                    window.location.href = result.pdfUrl;
-                    msg.innerText = "作成完了！";
+                    // 💡 外部ブラウザでPDFを開く
+                    liff.openWindow({
+                        url: result.pdfUrl,
+                        external: true
+                    });
+                    msg.innerText = "作成完了！外部ブラウザに遷移します。";
                     setTimeout(() => liff.closeWindow(), 3000);
                 }
             } catch (e) {
