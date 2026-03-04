@@ -14,18 +14,48 @@
     </style>
 </head>
 <body>
-    <div class="card">
-        <h3 style="color: blue; font-weight: bold;">同窓会名簿 ダウンロード</h3>
-        <p>最新の名簿データをPDFにしてダウンロードします。</p>
-        <button id="downloadBtn" class="btn-pdf">PDFを作成する</button>
-        <div id="statusMsg" style="margin-top:20px; color:#666;"></div>
+    <div id="app-content">
+        <div class="card">
+            <h3 style="color: blue; font-weight: bold;">同窓会名簿 ダウンロード</h3>
+            <p>前日までの情報をベースにPDFを生成して外部ブラウザにて表示します。</p>
+            <p>閲覧およびダウンロード時にGoogleアカウントの確認が行われます。</p>
+            <p>ブラウザのメニューからダウンロードを選択してください。</p>
+            <button id="downloadBtn" class="btn-pdf">PDFを作成・表示する</button>
+            <div id="statusMsg" style="margin-top:20px; color:#666;"></div>
+        </div>
     </div>
+
+    <div id="error-message" class="error-overlay">
+        <h3>アクセス権限がありません</h3>
+        <p>この機能は同窓会公式LINEグループ内からのみ利用可能です。</p>
+    </div>
+
     <script>
         const MY_LIFF_ID = '2009269538-s27MR4OG';
+        let ALLOWED_GROUP_ID = "";
+
         async function main() {
             await liff.init({ liffId: MY_LIFF_ID });
             if (!liff.isLoggedIn()) { liff.login(); return; }
+
+            const profile = await liff.getProfile();
+
+            // GAS側に保持されている許可されたグループIDを取得
+            try {
+                const response = await postToGas({ reqType: 'getConfig', userId: profile.userId});
+                ALLOWED_GROUP_ID = response.allowedGroupId;
+            } catch (e) { console.error("データ取得エラー:", e); }
+
+            // グループIDチェック処理
+            const context = liff.getContext();
+            // グループ内からのアクセスか、かつIDが一致するか確認
+            if (!context || context.groupId !== ALLOWED_GROUP_ID) {
+                document.getElementById('app-content').style.display = 'none';
+                document.getElementById('error-message').style.display = 'block';
+                return; // 処理を中断
+            }
         }
+
         document.getElementById('downloadBtn').addEventListener('click', async () => {
             const btn = document.getElementById('downloadBtn');
             const msg = document.getElementById('statusMsg');
@@ -34,15 +64,18 @@
             btn.innerText = "作成中...";
             msg.innerText = "15秒ほどかかる場合があります。";
             try {
-                const response = await postToGas({ reqType: 'generatePDF', viewerUserId: profile.userId });
+                const response = await postToGas({ reqType: 'generatePDF', viewerUserId: profile.userId, groupId: context.groupId});
                 const result = await response.json();
-                console.log("result:", result);
-                if (result.status === 'unregistered') {
+
+                if (result.status === 'unauthorized') {
+                    alert('グループ外からのアクセスは許可されていません。');
+                    liff.closeWindow();
+                    return;
+                } else if (result.status === 'unregistered') {
                     alert('名簿登録者のみ利用可能です。');
                     liff.closeWindow();
                 } else if (result.status === 'success') {
-                    console.log("result.pdfUrl:", result.pdfUrl);
-                    // 💡 外部ブラウザでPDFを開く
+                    // 外部ブラウザでPDFを開く
                     liff.openWindow({
                         url: result.pdfUrl,
                         external: true

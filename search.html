@@ -19,28 +19,36 @@
     </style>
 </head>
 <body>
-    <h3 style="color: blue; font-weight: bold;">同窓会名簿 検索</h3>
+    <div id="app-content">
+        <h3 style="color: blue; font-weight: bold;">同窓会名簿 検索</h3>
 
-    <div id="loading">読み込み中...</div>
+        <div id="loading">読み込み中...</div>
 
-    <div id="mainContent" style="display: none;">
-        <div class="search-container">
-            <label>名前で検索</label>
-            <input type="text" id="searchName" placeholder="氏名を入力...">
-            
-            <label>旧姓で検索</label>
-            <input type="text" id="searchOldName" placeholder="旧姓を入力...">
-            
-            <label>LINE名で検索</label>
-            <input type="text" id="searchLineName" placeholder="LINEの表示名を入力...">
+        <div id="mainContent" style="display: none;">
+            <div class="search-container">
+                <label>名前で検索</label>
+                <input type="text" id="searchName" placeholder="氏名を入力...">
+                
+                <label>旧姓で検索</label>
+                <input type="text" id="searchOldName" placeholder="旧姓を入力...">
+                
+                <label>LINE名で検索</label>
+                <input type="text" id="searchLineName" placeholder="LINEの表示名を入力...">
+            </div>
+
+            <div id="resultCount" style="font-size: 0.8em; color: #888; margin-bottom: 10px;"></div>
+            <div id="resultList"></div>
         </div>
+    </div>
 
-        <div id="resultCount" style="font-size: 0.8em; color: #888; margin-bottom: 10px;"></div>
-        <div id="resultList"></div>
+    <div id="error-message" class="error-overlay">
+        <h3>アクセス権限がありません</h3>
+        <p>この機能は同窓会公式LINEグループ内からのみ利用可能です。</p>
     </div>
 
     <script>
         const MY_LIFF_ID = '2009269535-5JcGpiQO';
+        let ALLOWED_GROUP_ID = "";
         let allMembers = []; // 全データを保持する変数
 
         async function main() {
@@ -48,26 +56,43 @@
             if (!liff.isLoggedIn()) { liff.login(); return; }
 
             const profile = await liff.getProfile();
-            //console.log("Logged in User:", profile.userId);
+
+            // GAS側に保持されている許可されたグループIDを取得
+            try {
+                const response = await postToGas({ reqType: 'getConfig', userId: profile.userId});
+                ALLOWED_GROUP_ID = response.allowedGroupId;
+            } catch (e) { console.error("データ取得エラー:", e); }
+
+            // グループIDチェック処理
+            const context = liff.getContext();
+            // グループ内からのアクセスか、かつIDが一致するか確認
+            if (!context || context.groupId !== ALLOWED_GROUP_ID) {
+                document.getElementById('app-content').style.display = 'none';
+                document.getElementById('error-message').style.display = 'block';
+                return; // 処理を中断
+            }
 
             try {
                 // 1. 登録済みかチェック ＆ 全データ取得
                 // GAS側でreqType: 'getAllData'時に、送信者のuserIdが名簿にあるか確認するロジックを想定
                 const response = await postToGas({ 
                     reqType: 'getAllData', 
-                    viewerUserId: profile.userId 
+                    viewerUserId: profile.userId,
+                    groupId: context.groupId
                 });
                 const result = await response.json();
-                //console.log("GAS Response:", result);
 
-                if (result.status === 'unregistered') {
+                if (result.status === 'unauthorized') {
+                    alert('グループ外からのアクセスは許可されていません。');
+                    liff.closeWindow();
+                    return;
+                } else if (result.status === 'unregistered') {
                     alert('名簿未登録の方は検索機能を利用できません。まずは「登録・更新」から登録をお願いします。');
                     liff.closeWindow();
                     return;
                 }
 
                 allMembers = result.data || [];
-                //console.log("Processed allMembers:", allMembers);
 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
