@@ -67,18 +67,21 @@
             try {
                 const response = await postToGas({ reqType: 'getConfig', userId: profile.userId});
                 ALLOWED_GROUP_ID = response.allowedGroupId;
+                console.log("ALLOWED_GROUP_ID:"+ALLOWED_GROUP_ID);
             } catch (e) { console.error("データ取得エラー:", e); }
 
             // グループIDチェック処理
             const context = liff.getContext();
             // グループ内からのアクセスか、かつIDが一致するか確認
             if (!context || context.groupId !== ALLOWED_GROUP_ID) {
+                console.log("app-content: set none error-message block");
                 document.getElementById('app-content').style.display = 'none';
                 document.getElementById('error-message').style.display = 'block';
                 return; // 処理を中断
             }
 
             // アプリコンテンツを表示する
+            console.log("app-content: set block");
             document.getElementById('app-content').style.display = 'block';
 
             try {
