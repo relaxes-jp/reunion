@@ -14,7 +14,7 @@
     </style>
 </head>
 <body>
-    <div id="app-content">
+    <div id="app-content" style="display: none;">
         <div class="card">
             <h3 style="color: blue; font-weight: bold;">同窓会名簿 ダウンロード</h3>
             <p>前日までの情報をベースにPDFを生成して外部ブラウザにて表示します。</p>
@@ -54,6 +54,9 @@
                 document.getElementById('error-message').style.display = 'block';
                 return; // 処理を中断
             }
+
+            // アプリコンテンツを表示する
+            document.getElementById('app-content').style.display = 'block';
         }
 
         document.getElementById('downloadBtn').addEventListener('click', async () => {

@@ -15,7 +15,7 @@
     </style>
 </head>
 <body>
-    <div id="app-content">
+    <div id="app-content" style="display: none;">
         <h3 style="color: blue; font-weight: bold;">リーガ同窓会名簿 入力・更新</h3>
         <p style="color: red; font-weight: bold;">※更新の場合は情報取得されるまでしばらくお待ちください。</p>
         <p style="color: red; font-weight: bold;">※更新時にLINEのログイン処理が行われた場合はもう一度起動しなおしてください。</p>
@@ -77,6 +77,9 @@
                 document.getElementById('error-message').style.display = 'block';
                 return; // 処理を中断
             }
+
+            // アプリコンテンツを表示する
+            document.getElementById('app-content').style.display = 'block';
 
             try {
                 const response = await postToGas({ reqType: 'getInitial', userId: profile.userId, groupId: context.groupId });
