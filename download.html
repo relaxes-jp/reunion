@@ -32,7 +32,6 @@
 
     <script>
         const MY_LIFF_ID = '2009269538-s27MR4OG';
-        let ALLOWED_GROUP_ID = "";
 
         async function main() {
             await liff.init({ liffId: MY_LIFF_ID });
@@ -43,13 +42,13 @@
             // GAS側に保持されている許可されたグループIDを取得
             try {
                 const response = await postToGas({ reqType: 'getConfig', userId: profile.userId});
-                ALLOWED_GROUP_ID = response.allowedGroupId;
+                const groupId = response.allowedGroupId;
             } catch (e) { console.error("データ取得エラー:", e); }
 
             // グループIDチェック処理
             const context = liff.getContext();
             // グループ内からのアクセスか、かつIDが一致するか確認
-            if (!context || context.groupId !== ALLOWED_GROUP_ID) {
+            if (!context || context.groupId !== groupId) {
                 document.getElementById('app-content').style.display = 'none';
                 document.getElementById('error-message').style.display = 'block';
                 return; // 処理を中断
