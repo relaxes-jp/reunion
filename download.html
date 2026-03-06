@@ -49,8 +49,7 @@
             msg.innerText = "15秒ほどかかる場合があります。";
 
             try {
-                const response = await postToGas({ reqType: 'generatePDF', viewerUserId: profile.userId, groupUUID: context.groupId});
-                const result = await response.json();
+                const result = await postToGas({ reqType: 'generatePDF', viewerUserId: profile.userId, groupUUID: context.groupId});
 
                 if (result.status === 'unauthorized') {
                     alert('グループ外からのアクセスは許可されていません。');

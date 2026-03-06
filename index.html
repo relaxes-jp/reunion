@@ -65,9 +65,10 @@
             if (!auth) return; // 失敗時は共通関数側でエラー表示済み
 
             try {
+                console.log("userId:", auth.profile.userId);
+                console.log("groupUUID:", auth.context.groupId);
                 // 登録済みユーザー情報を取得設定
-                const response = await postToGas({ reqType: 'getInitial', userId: auth.profile.userId, groupUUID: auth.context.groupId });
-                const result = await response.json();
+                const result = await postToGas({ reqType: 'getInitial', userId: auth.profile.userId, groupUUID: auth.context.groupId });
                 if (result.status === 'success' && result.data) {
                     document.getElementById('name').value = result.data.name || "";
                     document.getElementById('oldName').value = result.data.oldName || "";
@@ -101,14 +102,13 @@
             };
 
             try {
-                const response = await postToGas(formData);
-                const resData = await response.json();
-                if (resData.status === 'success') {
+                const result = await postToGas(formData);
+                if (result.status === 'success') {
                     const msg = document.getElementById('notify').value === 'true' 
                         ? '保存完了！グループへ通知しました。' 
                         : '保存完了！(通知なし)';
                     closeLiff(msg);
-                } else if (resData.status === 'unauthorized') {
+                } else if (result.status === 'unauthorized') {
                     alert('グループ外からのアクセスは許可されていません。');
                 }
             } catch (err) { alert('保存に失敗しました。'); }

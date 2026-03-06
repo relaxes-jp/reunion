@@ -11,6 +11,7 @@ const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwGgEqEC8lclUn6
  */
 async function initializeAndValidateAccess(myLiffId) {
     try {
+        console.log("initializeAndValidateAccess:", myLiffId);
         // 1. LIFF初期化
         await liff.init({ liffId: myLiffId });
         if (!liff.isLoggedIn()) { liff.login(); return null; }
@@ -19,14 +20,16 @@ async function initializeAndValidateAccess(myLiffId) {
         const context = liff.getContext();
         const currentGroupUUID = context ? context.groupId : null;
 
+        console.log("currentGroupUUID:", currentGroupUUID);
         // 2. GASから許可されたグループIDを取得（サイレント同期含む）
-        const response = await postToGas({ 
+        const result = await postToGas({ 
             reqType: 'getConfig', 
             userId: profile.userId, 
             groupUUID: currentGroupUUID
         });
 
-        const allowedGroupId = response.allowedGroupId;
+        const allowedGroupId = result.allowedGroupId;
+        console.log("allowedGroupId:", allowedGroupId);
 
         // 3. 権限チェック
         if (!context || !currentGroupUUID || currentGroupUUID !== allowedGroupId) {

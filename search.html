@@ -57,12 +57,11 @@
             try {
                 // 登録済みかチェック ＆ 全データ取得
                 // GAS側でreqType: 'getAllData'時に、送信者のuserIdが名簿にあるか確認するロジックを想定
-                const response = await postToGas({ 
+                const result = await postToGas({ 
                     reqType: 'getAllData', 
                     viewerUserId: auth.profile.userId,
                     groupUUID: auth.context.groupId
                 });
-                const result = await response.json();
 
                 if (result.status === 'unauthorized') {
                     alert('グループ外からのアクセスは許可されていません。');
