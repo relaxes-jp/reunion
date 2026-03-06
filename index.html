@@ -61,37 +61,12 @@
         const MY_LIFF_ID = '2009200501-caMtwvTZ';
 
         async function main() {
-            await liff.init({ liffId: MY_LIFF_ID });
-            if (!liff.isLoggedIn()) { liff.login(); return; }
-
-            const profile = await liff.getProfile();
-            let allowedGroupId = "";
-
-            // GAS側に保持されている許可されたグループIDを取得
-            try {
-                const response = await postToGas({ reqType: 'getConfig', userId: profile.userId});
-                console.log("response:", response);
-                allowedGroupId = response.allowedGroupId;
-                console.log("allowedGroupId:", allowedGroupId);
-            } catch (e) { console.error("データ取得エラー:", e); }
-
-            // グループIDチェック処理
-            const context = liff.getContext();
-            console.log("context:",context);
-            // グループ内からのアクセスか、かつIDが一致するか確認
-            if (!context || context.groupId !== allowedGroupId) {
-                console.log("app-content: set none error-message block");
-                document.getElementById('app-content').style.display = 'none';
-                document.getElementById('error-message').style.display = 'block';
-                return; // 処理を中断
-            }
-
-            // アプリコンテンツを表示する
-            console.log("app-content: set block");
-            document.getElementById('app-content').style.display = 'block';
+            const auth = await initializeAndValidateAccess(MY_LIFF_ID);
+            if (!auth) return; // 失敗時は共通関数側でエラー表示済み
 
             try {
-                const response = await postToGas({ reqType: 'getInitial', userId: profile.userId, groupId: context.groupId });
+                // 登録済みユーザー情報を取得設定
+                const response = await postToGas({ reqType: 'getInitial', userId: auth.profile.userId, groupUUID: auth.context.groupId });
                 const result = await response.json();
                 if (result.status === 'success' && result.data) {
                     document.getElementById('name').value = result.data.name || "";
@@ -107,6 +82,7 @@
         }
         main();
 
+        // 登録・更新処理
         document.getElementById('form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const profile = await liff.getProfile(); 
@@ -115,7 +91,7 @@
             const formData = {
                 reqType: 'saveData',
                 userId: profile.userId,
-                groupId: context ? context.groupId : null,
+                groupUUID: context ? context.groupId : null,
                 lineName: profile.displayName,
                 name: document.getElementById('name').value,
                 oldName: document.getElementById('oldName').value,

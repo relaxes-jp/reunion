@@ -32,43 +32,24 @@
 
     <script>
         const MY_LIFF_ID = '2009269538-s27MR4OG';
-        let allowedGroupId = "";
 
         async function main() {
-            await liff.init({ liffId: MY_LIFF_ID });
-            if (!liff.isLoggedIn()) { liff.login(); return; }
-
-            const profile = await liff.getProfile();
-
-            // GAS側に保持されている許可されたグループIDを取得
-            try {
-                const response = await postToGas({ reqType: 'getConfig', userId: profile.userId});
-                allowedGroupId = response.allowedGroupId;
-                console.log("allowedGroupId:"+allowedGroupId);
-            } catch (e) { console.error("データ取得エラー:", e); }
-
-            // グループIDチェック処理
-            const context = liff.getContext();
-            // グループ内からのアクセスか、かつIDが一致するか確認
-            if (!context || context.groupId !== allowedGroupId) {
-                document.getElementById('app-content').style.display = 'none';
-                document.getElementById('error-message').style.display = 'block';
-                return; // 処理を中断
-            }
-
-            // アプリコンテンツを表示する
-            document.getElementById('app-content').style.display = 'block';
+            const auth = await initializeAndValidateAccess(MY_LIFF_ID);
+            if (!auth) return; // 失敗時は共通関数側でエラー表示済み
         }
 
         document.getElementById('downloadBtn').addEventListener('click', async () => {
+            const profile = await liff.getProfile();
+            const context = liff.getContext();
             const btn = document.getElementById('downloadBtn');
             const msg = document.getElementById('statusMsg');
-            const profile = await liff.getProfile();
+
             btn.disabled = true;
             btn.innerText = "作成中...";
             msg.innerText = "15秒ほどかかる場合があります。";
+
             try {
-                const response = await postToGas({ reqType: 'generatePDF', viewerUserId: profile.userId, groupId: context.groupId});
+                const response = await postToGas({ reqType: 'generatePDF', viewerUserId: profile.userId, groupUUID: context.groupId});
                 const result = await response.json();
 
                 if (result.status === 'unauthorized') {

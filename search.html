@@ -48,41 +48,19 @@
 
     <script>
         const MY_LIFF_ID = '2009269535-5JcGpiQO';
-        let allowedGroupId = "";
         let allMembers = []; // 全データを保持する変数
 
         async function main() {
-            await liff.init({ liffId: MY_LIFF_ID });
-            if (!liff.isLoggedIn()) { liff.login(); return; }
-
-            const profile = await liff.getProfile();
-
-            // GAS側に保持されている許可されたグループIDを取得
-            try {
-                const response = await postToGas({ reqType: 'getConfig', userId: profile.userId});
-                allowedGroupId = response.allowedGroupId;
-                console.log("allowedGroupId:"+allowedGroupId);
-            } catch (e) { console.error("データ取得エラー:", e); }
-
-            // グループIDチェック処理
-            const context = liff.getContext();
-            // グループ内からのアクセスか、かつIDが一致するか確認
-            if (!context || context.groupId !== allowedGroupId) {
-                document.getElementById('app-content').style.display = 'none';
-                document.getElementById('error-message').style.display = 'block';
-                return; // 処理を中断
-            }
-
-            // アプリコンテンツを表示する
-            document.getElementById('app-content').style.display = 'block';
+            const auth = await initializeAndValidateAccess(MY_LIFF_ID);
+            if (!auth) return; // 失敗時は共通関数側でエラー表示済み
 
             try {
-                // 1. 登録済みかチェック ＆ 全データ取得
+                // 登録済みかチェック ＆ 全データ取得
                 // GAS側でreqType: 'getAllData'時に、送信者のuserIdが名簿にあるか確認するロジックを想定
                 const response = await postToGas({ 
                     reqType: 'getAllData', 
-                    viewerUserId: profile.userId,
-                    groupId: context.groupId
+                    viewerUserId: auth.profile.userId,
+                    groupUUID: auth.context.groupId
                 });
                 const result = await response.json();
 

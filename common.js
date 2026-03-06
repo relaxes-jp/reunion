@@ -6,6 +6,67 @@
 const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwGgEqEC8lclUn6OBid-snBEPxkgwJr7vzgPOhuPzoHBdV7jj3bt1o80p8hR5sSxEd1uQ/exec';
 
 /**
+ * LIFF初期化とグループアクセス権限のチェックを行う共通関数
+ * @returns {Promise<{profile: Object, context: Object} | null>}
+ */
+async function initializeAndValidateAccess(myLiffId) {
+    try {
+        // 1. LIFF初期化
+        await liff.init({ liffId: myLiffId });
+        if (!liff.isLoggedIn()) { liff.login(); return null; }
+
+        const profile = await liff.getProfile();
+        const context = liff.getContext();
+        const currentGroupUUID = context ? context.groupId : null;
+
+        // 2. GASから許可されたグループIDを取得（サイレント同期含む）
+        const response = await postToGas({ 
+            reqType: 'getConfig', 
+            userId: profile.userId, 
+            groupUUID: currentGroupUUID
+        });
+
+        const allowedGroupId = response.allowedGroupId;
+
+        // 3. 権限チェック
+        if (!context || !currentGroupUUID || currentGroupUUID !== allowedGroupId) {
+            console.warn("Access Denied: Group ID mismatch");
+            showErrorPage();
+            return null;
+        }
+
+        // 4. OKならコンテンツ表示
+        showMainContent();
+        return { profile, context };
+
+    } catch (error) {
+        console.error("Initialization failed:", error);
+        showErrorPage();
+        return null;
+    }
+}
+
+/**
+ * メインコンテンツ表示関数
+ */
+function showMainContent() {
+    const app = document.getElementById('app-content');
+    const err = document.getElementById('error-message');
+    if (app) app.style.display = 'block';
+    if (err) err.style.display = 'none';
+}
+
+/**
+ * エラーメッセージ表示関数
+ */
+function showErrorPage() {
+    const app = document.getElementById('app-content');
+    const err = document.getElementById('error-message');
+    if (app) app.style.display = 'none';
+    if (err) err.style.display = 'block';
+}
+
+/**
  * GASへ通信する共通関数
  */
 async function postToGas(data) {
