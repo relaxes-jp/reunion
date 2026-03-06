@@ -48,6 +48,7 @@
 
     <script>
         const MY_LIFF_ID = '2009269535-5JcGpiQO';
+        let allowedGroupId = "";
         let allMembers = []; // 全データを保持する変数
 
         async function main() {
@@ -59,13 +60,14 @@
             // GAS側に保持されている許可されたグループIDを取得
             try {
                 const response = await postToGas({ reqType: 'getConfig', userId: profile.userId});
-                const groupId = response.allowedGroupId;
+                allowedGroupId = response.allowedGroupId;
+                console.log("allowedGroupId:"+allowedGroupId);
             } catch (e) { console.error("データ取得エラー:", e); }
 
             // グループIDチェック処理
             const context = liff.getContext();
             // グループ内からのアクセスか、かつIDが一致するか確認
-            if (!context || context.groupId !== groupId) {
+            if (!context || context.groupId !== allowedGroupId) {
                 document.getElementById('app-content').style.display = 'none';
                 document.getElementById('error-message').style.display = 'block';
                 return; // 処理を中断
