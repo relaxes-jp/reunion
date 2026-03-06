@@ -55,20 +55,20 @@
 
     <script>
         const MY_LIFF_ID = '2009200501-caMtwvTZ';
-        let allowedGroupId = "";
 
         async function main() {
             await liff.init({ liffId: MY_LIFF_ID });
             if (!liff.isLoggedIn()) { liff.login(); return; }
 
             const profile = await liff.getProfile();
+            let allowedGroupId = "";
 
             // GAS側に保持されている許可されたグループIDを取得
             try {
                 const response = await postToGas({ reqType: 'getConfig', userId: profile.userId});
                 console.log("response:", response);
                 allowedGroupId = response.allowedGroupId;
-                console.log("allowedGroupId:"+allowedGroupId);
+                console.log("allowedGroupId:", allowedGroupId);
             } catch (e) { console.error("データ取得エラー:", e); }
 
             // グループIDチェック処理
