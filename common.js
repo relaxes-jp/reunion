@@ -15,7 +15,7 @@ async function postToGas(data) {
         body: JSON.stringify(data)
     });
     if (!response.ok) throw new Error('Network response was not ok');
-    return response;
+    return response.json();
 }
 
 /**
