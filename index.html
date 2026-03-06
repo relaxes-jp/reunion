@@ -66,6 +66,7 @@
             // GAS側に保持されている許可されたグループIDを取得
             try {
                 const response = await postToGas({ reqType: 'getConfig', userId: profile.userId});
+                console.log("response:", response);
                 allowedGroupId = response.allowedGroupId;
                 console.log("allowedGroupId:"+allowedGroupId);
             } catch (e) { console.error("データ取得エラー:", e); }
