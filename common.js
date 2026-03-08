@@ -99,6 +99,7 @@ function showErrorPage() {
  */
 async function postToGas(data) {
     try {
+        console.log("postToGas data:", data);
         const response = await fetch(GAS_WEB_APP_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain' },
