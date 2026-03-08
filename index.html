@@ -112,8 +112,9 @@
             try {
                 const result = await postToGas(formData);
                 console.log("result:", result);
+                const notifyValue = document.querySelector('input[name="notify"]:checked').value;
                 if (result.status === 'success') {
-                    const msg = document.getElementById('notify').value === 'true' 
+                    const msg = notifyValue === 'true' 
                         ? '保存完了！グループへ通知しました。' 
                         : '保存完了！(通知なし)';
                     closeLiff(msg);
