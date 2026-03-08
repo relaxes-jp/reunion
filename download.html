@@ -40,16 +40,16 @@
 
         document.getElementById('downloadBtn').addEventListener('click', async () => {
             const profile = await liff.getProfile();
-            const context = liff.getContext();
             const btn = document.getElementById('downloadBtn');
             const msg = document.getElementById('statusMsg');
+            const receivedKey = getAccessKey();
 
             btn.disabled = true;
             btn.innerText = "作成中...";
             msg.innerText = "15秒ほどかかる場合があります。";
 
             try {
-                const result = await postToGas({ reqType: 'generatePDF', viewerUserId: profile.userId, groupUUID: context.groupId});
+                const result = await postToGas({ reqType: 'generatePDF', viewerUserId: profile.userId, accessToken: receivedKey});
 
                 if (result.status === 'unauthorized') {
                     alert('グループ外からのアクセスは許可されていません。');

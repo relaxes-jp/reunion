@@ -14,39 +14,49 @@ async function initializeAndValidateAccess(myLiffId) {
         console.log("initializeAndValidateAccess:", myLiffId);
         // 1. LIFF初期化
         await liff.init({ liffId: myLiffId });
+
+        const receivedKey = getAccessKey();
+        
+        console.log("URLから取得したID:", receivedKey);
+
         if (!liff.isLoggedIn()) { liff.login(); return null; }
 
         const profile = await liff.getProfile();
-        const context = liff.getContext();
-        const currentGroupUUID = context ? context.groupId : null;
 
-        console.log("currentGroupUUID:", currentGroupUUID);
         // 2. GASから許可されたグループIDを取得（サイレント同期含む）
         const result = await postToGas({ 
-            reqType: 'getConfig', 
+            reqType: 'checkAuth', 
             userId: profile.userId, 
-            groupUUID: currentGroupUUID
+            accessToken: receivedKey
         });
 
-        const allowedGroupId = result.allowedGroupId;
-        console.log("allowedGroupId:", allowedGroupId);
+        const isAccepted = result.isAccepted === 'true';
+        console.log("isAccepted:", isAccepted);
 
         // 3. 権限チェック
-        if (!context || !currentGroupUUID || currentGroupUUID !== allowedGroupId) {
-            console.warn("Access Denied: Group ID mismatch");
+        if (!isAccepted) {
+            console.warn("Access Denied: Don't Acceped");
             showErrorPage();
             return null;
         }
 
         // 4. OKならコンテンツ表示
         showMainContent();
-        return { profile, context };
+        return { profile, context, receivedKey };
 
     } catch (error) {
         console.error("Initialization failed:", error);
         showErrorPage();
         return null;
     }
+}
+
+/**
+ * URLパラメータ取得
+ */
+function getAccessKey() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('key');
 }
 
 /**

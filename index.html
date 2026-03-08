@@ -66,9 +66,10 @@
 
             try {
                 console.log("userId:", auth.profile.userId);
-                console.log("groupUUID:", auth.context.groupId);
+                console.log("receiveId:", auth.receivedKey);
+                
                 // 登録済みユーザー情報を取得設定
-                const result = await postToGas({ reqType: 'getInitial', userId: auth.profile.userId, groupUUID: auth.context.groupId });
+                const result = await postToGas({ reqType: 'getInitial', userId: auth.profile.userId, accessToken: receivedKey });
                 if (result.status === 'success' && result.data) {
                     document.getElementById('name').value = result.data.name || "";
                     document.getElementById('oldName').value = result.data.oldName || "";
@@ -87,12 +88,12 @@
         document.getElementById('form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const profile = await liff.getProfile(); 
-            const context = liff.getContext();
+            const receivedKey = getAccessKey();
 
             const formData = {
                 reqType: 'saveData',
                 userId: profile.userId,
-                groupUUID: context ? context.groupId : null,
+                accessToken: receivedKey,
                 lineName: profile.displayName,
                 name: document.getElementById('name').value,
                 oldName: document.getElementById('oldName').value,
