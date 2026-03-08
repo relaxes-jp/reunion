@@ -23,6 +23,7 @@
     <div id="app-content" style="display: none;">
         <div id="loading">読み込み中...</div>
         <div id="mainContent" style="display: none;">
+            <p style="color: black; font-weight: bold;">名簿の検索結果についてはグループチャットへの通知は行われず、この画面内のみに表示されます。</p>
             <div class="search-container">
                 <label>LINE名で検索</label>
                 <input type="text" id="searchLineName" placeholder="LINEの表示名を入力...">
@@ -117,7 +118,6 @@
                     <div class="message-box">近況報告: ${m.message}</div>
                 </div>
             `).join('');
-            //console.log("list.innerHTML:", list.innerHTML);
         }
 
         // 検索入力イベントの設定
