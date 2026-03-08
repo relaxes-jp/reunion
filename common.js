@@ -11,7 +11,6 @@ const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwGgEqEC8lclUn6
  */
 async function initializeAndValidateAccess(myLiffId) {
     try {
-        console.log("initializeAndValidateAccess:", myLiffId);
         // 1. LIFF初期化
         await liff.init({ liffId: myLiffId });
 
