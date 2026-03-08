@@ -35,7 +35,16 @@
 
         async function main() {
             const auth = await initializeAndValidateAccess(MY_LIFF_ID);
-            if (!auth) return; // 失敗時は共通関数側でエラー表示済み
+            if (auth.status === 'unauthorized') {
+                alert('グループ外からのアクセスは許可されていません。');
+                liff.closeWindow();
+                return;
+            } else if (auth.status === 'unregistered') {
+                alert('名簿のダウンロード機能は名簿登録者のみ利用可能です。');
+                liff.closeWindow();
+            }
+
+            if (auth.status !== 'success') return;
         }
 
         document.getElementById('downloadBtn').addEventListener('click', async () => {
@@ -49,16 +58,9 @@
             msg.innerText = "15秒ほどかかる場合があります。";
 
             try {
-                const result = await postToGas({ reqType: 'generatePDF', viewerUserId: profile.userId, accessToken: receivedKey});
+                const result = await postToGas({ reqType: 'generatePDF', userId: profile.userId, accessToken: receivedKey});
 
-                if (result.status === 'unauthorized') {
-                    alert('グループ外からのアクセスは許可されていません。');
-                    liff.closeWindow();
-                    return;
-                } else if (result.status === 'unregistered') {
-                    alert('名簿登録者のみ利用可能です。');
-                    liff.closeWindow();
-                } else if (result.status === 'success') {
+                if (result.status === 'success') {
                     // 外部ブラウザでPDFを開く
                     liff.openWindow({
                         url: result.pdfUrl,

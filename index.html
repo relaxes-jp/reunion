@@ -62,7 +62,12 @@
 
         async function main() {
             const auth = await initializeAndValidateAccess(MY_LIFF_ID);
-            if (!auth) return; // 失敗時は共通関数側でエラー表示済み
+            if (auth.status === 'unauthorized') {
+                alert('グループ外からのアクセスは許可されていません。');
+                liff.closeWindow();
+            }
+
+            if (auth.status !== 'success') return;
 
             try {
                 console.log("userId:", auth.profile.userId);
@@ -109,8 +114,6 @@
                         ? '保存完了！グループへ通知しました。' 
                         : '保存完了！(通知なし)';
                     closeLiff(msg);
-                } else if (result.status === 'unauthorized') {
-                    alert('グループ外からのアクセスは許可されていません。');
                 }
             } catch (err) { alert('保存に失敗しました。'); }
         });

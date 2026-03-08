@@ -25,13 +25,13 @@ async function initializeAndValidateAccess(myLiffId) {
         const result = await postToGas({ 
             reqType: 'checkAuth', 
             userId: profile.userId, 
-            accessToken: receivedKey
+            accessToken: receivedKey,
+            liffId: myLiffId
         });
-
-        const isAccepted = result.isAccepted === 'true';
+        const status = result.status;
 
         // 3. 権限チェック
-        if (!isAccepted) {
+        if (status !== 'success') {
             console.warn("Access Denied: Don't Acceped");
             showErrorPage();
             return null;
@@ -39,7 +39,7 @@ async function initializeAndValidateAccess(myLiffId) {
 
         // 4. OKならコンテンツ表示
         showMainContent();
-        return { profile, receivedKey };
+        return { status, profile, receivedKey };
 
     } catch (error) {
         console.error("Initialization failed:", error);

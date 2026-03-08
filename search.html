@@ -52,26 +52,24 @@
 
         async function main() {
             const auth = await initializeAndValidateAccess(MY_LIFF_ID);
-            if (!auth) return; // 失敗時は共通関数側でエラー表示済み
+            if (auth.status === 'unauthorized') {
+                alert('グループ外からのアクセスは許可されていません。');
+                liff.closeWindow();
+            } else if (auth.status === 'unregistered') {
+                alert('名簿未登録の方は検索機能を利用できません。まずは「登録・更新」から登録をお願いします。');
+                liff.closeWindow();
+            }
+
+            if (auth.status !== 'success') return;
 
             try {
                 // 登録済みかチェック ＆ 全データ取得
                 // GAS側でreqType: 'getAllData'時に、送信者のuserIdが名簿にあるか確認するロジックを想定
                 const result = await postToGas({ 
                     reqType: 'getAllData', 
-                    viewerUserId: auth.profile.userId,
+                    userId: auth.profile.userId,
                     accessToken: auth.receivedKey
                 });
-
-                if (result.status === 'unauthorized') {
-                    alert('グループ外からのアクセスは許可されていません。');
-                    liff.closeWindow();
-                    return;
-                } else if (result.status === 'unregistered') {
-                    alert('名簿未登録の方は検索機能を利用できません。まずは「登録・更新」から登録をお願いします。');
-                    liff.closeWindow();
-                    return;
-                }
 
                 allMembers = result.data || [];
 
