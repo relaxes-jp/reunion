@@ -67,19 +67,19 @@ function showMainContent() {
     const wait = document.getElementById('wait-message');
     const err = document.getElementById('error-message');
     if (app) app.style.display = 'block';
-    if (wait) app.style.display = 'none';
+    if (wait) wait.style.display = 'none';
     if (err) err.style.display = 'none';
 }
 
 /**
- * 認証・情報取得メッセージ表示関数
+ * 認証中メッセージ表示関数
  */
 function showWaitContent() {
     const app = document.getElementById('app-content');
     const wait = document.getElementById('wait-message');
     const err = document.getElementById('error-message');
     if (app) app.style.display = 'none';
-    if (wait) app.style.display = 'block';
+    if (wait) wait.style.display = 'block';
     if (err) err.style.display = 'none';
 }
 
@@ -91,7 +91,7 @@ function showErrorPage() {
     const wait = document.getElementById('wait-message');
     const err = document.getElementById('error-message');
     if (app) app.style.display = 'none';
-    if (wait) app.style.display = 'none';
+    if (wait) wait.style.display = 'none';
     if (err) err.style.display = 'block';
 }
 
