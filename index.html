@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>同窓会名簿入力</title>
+    <title>同窓会名簿入力・更新</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script src="common.js"></script>
     <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
@@ -19,10 +19,12 @@
     </style>
 </head>
 <body>
+    
+    <h3 style="color: blue; font-weight: bold;">リーガ同窓会名簿 入力・更新</h3>
     <div id="app-content" style="display: none;">
-        <h3 style="color: blue; font-weight: bold;">リーガ同窓会名簿 入力・更新</h3>
         <p style="color: red; font-weight: bold;">※更新の場合は情報取得されるまでしばらくお待ちください。</p>
         <p style="color: red; font-weight: bold;">※更新時にLINEのログイン処理が行われた場合はもう一度起動しなおしてください。</p>
+
         <form id="form">
             <label class="required">氏名</label>
             <input type="text" id="name" required>
