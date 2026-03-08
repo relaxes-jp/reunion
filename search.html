@@ -24,19 +24,24 @@
         <div id="loading">読み込み中...</div>
         <div id="mainContent" style="display: none;">
             <div class="search-container">
+                <label>LINE名で検索</label>
+                <input type="text" id="searchLineName" placeholder="LINEの表示名を入力...">
+
                 <label>名前で検索</label>
                 <input type="text" id="searchName" placeholder="氏名を入力...">
                 
                 <label>旧姓で検索</label>
                 <input type="text" id="searchOldName" placeholder="旧姓を入力...">
-                
-                <label>LINE名で検索</label>
-                <input type="text" id="searchLineName" placeholder="LINEの表示名を入力...">
             </div>
 
             <div id="resultCount" style="font-size: 0.8em; color: #888; margin-bottom: 10px;"></div>
             <div id="resultList"></div>
         </div>
+    </div>
+
+    <div id="wait-message" style="display: none;" class="error-overlay">
+        <h3>認証中</h3>
+        <p>ただいま認証中です。しばらくお待ちください。</p>
     </div>
 
     <div id="error-message" style="display: none;" class="error-overlay">
@@ -62,7 +67,6 @@
 
             try {
                 // 登録済みかチェック ＆ 全データ取得
-                // GAS側でreqType: 'getAllData'時に、送信者のuserIdが名簿にあるか確認するロジックを想定
                 const result = await postToGas({ 
                     reqType: 'getAllData', 
                     userId: auth.profile.userId,
@@ -84,19 +88,19 @@
 
         // リストを表示する関数
         function renderList(members) {
-            //console.log("renderList:", members);
             const list = document.getElementById('resultList');
             const countBox = document.getElementById('resultCount');
 
             // 検索前の状態（リストが0件かつ入力が空の場合）
+            const sLine = document.getElementById('searchLineName').value;
             const sName = document.getElementById('searchName').value;
             const sOld = document.getElementById('searchOldName').value;
-            const sLine = document.getElementById('searchLineName').value;
+
 
             if (members.length === 0) {
                 countBox.innerText = "";
                 if (!sName && !sOld && !sLine) {
-                    list.innerHTML = '<div style="text-align:center; color:#888; margin-top:20px;">名前、旧姓、LINE名のいずれか入力して検索してください</div>';
+                    list.innerHTML = '<div style="text-align:center; color:#888; margin-top:20px;">LINE名、名前、旧姓のいずれか入力して検索してください</div>';
                 } else {
                     list.innerHTML = '<div style="text-align:center; color:#888; margin-top:20px;">該当するメンバーが見つかりません</div>';
                 }
@@ -119,12 +123,10 @@
         // 検索入力イベントの設定
         ['searchName', 'searchOldName', 'searchLineName'].forEach(id => {
             document.getElementById(id).addEventListener('input', () => {
-                //console.log("EventListener input allMembers:", allMembers);
+                const sLine = document.getElementById('searchLineName').value.toLowerCase();
                 const sName = document.getElementById('searchName').value.toLowerCase();
                 const sOld = document.getElementById('searchOldName').value.toLowerCase();
-                const sLine = document.getElementById('searchLineName').value.toLowerCase();
 
-                //console.log("sName:"+sName+" sOld:"+sOld+" sLine:"+sLine);
                 let filtered = [];
                 // 検索窓が全て空なら、リストをクリア
                 if (!sName && !sOld && !sLine) {
@@ -132,12 +134,11 @@
                 } else {
                     // いずれかの入力にヒットすれば表示
                     filtered = allMembers.filter(m => {
-                        return (sName && (m.name || "").toLowerCase().includes(sName)) ||
-                            (sOld && (m.oldName || "").toLowerCase().includes(sOld)) ||
-                            (sLine && (m.lineName || "").toLowerCase().includes(sLine));
+                        return (sLine && (m.lineName || "").toLowerCase().includes(sLine)) ||
+                            (sName && (m.name || "").toLowerCase().includes(sName)) ||
+                            (sOld && (m.oldName || "").toLowerCase().includes(sOld));
                     });
                 }
-                //console.log("filtered:", filtered);
                 renderList(filtered);
             });
         });
