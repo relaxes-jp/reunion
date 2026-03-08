@@ -98,13 +98,19 @@ function showErrorPage() {
  * GASへ通信する共通関数
  */
 async function postToGas(data) {
-    const response = await fetch(GAS_WEB_APP_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(data)
-    });
-    if (!response.ok) throw new Error('Network response was not ok');
-    return response.json();
+    try {
+        const response = await fetch(GAS_WEB_APP_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+    } catch (error) {
+        console.error("postToGas failed:", error);
+        return null;
+    }
+
 }
 
 /**
