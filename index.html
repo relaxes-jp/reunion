@@ -109,6 +109,7 @@
 
             try {
                 const result = await postToGas(formData);
+                console.log("result:", result);
                 if (result.status === 'success') {
                     const msg = document.getElementById('notify').value === 'true' 
                         ? '保存完了！グループへ通知しました。' 
