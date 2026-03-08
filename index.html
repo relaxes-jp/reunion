@@ -69,7 +69,7 @@
                 console.log("receiveId:", auth.receivedKey);
                 
                 // 登録済みユーザー情報を取得設定
-                const result = await postToGas({ reqType: 'getInitial', userId: auth.profile.userId, accessToken: receivedKey });
+                const result = await postToGas({ reqType: 'getInitial', userId: auth.profile.userId, accessToken: auth.receivedKey });
                 if (result.status === 'success' && result.data) {
                     document.getElementById('name').value = result.data.name || "";
                     document.getElementById('oldName').value = result.data.oldName || "";

@@ -7,7 +7,7 @@ const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwGgEqEC8lclUn6
 
 /**
  * LIFF初期化とグループアクセス権限のチェックを行う共通関数
- * @returns {Promise<{profile: Object, context: Object} | null>}
+ * @returns {Promise<{profile: Object, receivedKey: String} | null>}
  */
 async function initializeAndValidateAccess(myLiffId) {
     try {
@@ -17,13 +17,11 @@ async function initializeAndValidateAccess(myLiffId) {
 
         const receivedKey = getAccessKey();
         
-        console.log("URLから取得したID:", receivedKey);
-
         if (!liff.isLoggedIn()) { liff.login(); return null; }
 
         const profile = await liff.getProfile();
 
-        // 2. GASから許可されたグループIDを取得（サイレント同期含む）
+        // 2. 
         const result = await postToGas({ 
             reqType: 'checkAuth', 
             userId: profile.userId, 
@@ -31,7 +29,6 @@ async function initializeAndValidateAccess(myLiffId) {
         });
 
         const isAccepted = result.isAccepted === 'true';
-        console.log("isAccepted:", isAccepted);
 
         // 3. 権限チェック
         if (!isAccepted) {
@@ -42,7 +39,7 @@ async function initializeAndValidateAccess(myLiffId) {
 
         // 4. OKならコンテンツ表示
         showMainContent();
-        return { profile, context, receivedKey };
+        return { profile, receivedKey };
 
     } catch (error) {
         console.error("Initialization failed:", error);
