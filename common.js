@@ -21,7 +21,10 @@ async function initializeAndValidateAccess(myLiffId) {
 
         const profile = await liff.getProfile();
 
-        // 2. 
+        // 認証中処理
+        showWaitContent();
+
+        // 認証処理
         const result = await postToGas({ 
             reqType: 'checkAuth', 
             userId: profile.userId, 
@@ -30,14 +33,14 @@ async function initializeAndValidateAccess(myLiffId) {
         });
         const status = result.status;
 
-        // 3. 権限チェック
+        // 権限チェック
         if (status !== 'success') {
             console.warn("Access Denied: Don't Acceped");
             showErrorPage();
             return null;
         }
 
-        // 4. OKならコンテンツ表示
+        // OKならコンテンツ表示
         showMainContent();
         return { status, profile, receivedKey };
 
@@ -61,8 +64,22 @@ function getAccessKey() {
  */
 function showMainContent() {
     const app = document.getElementById('app-content');
+    const wait = document.getElementById('wait-message');
     const err = document.getElementById('error-message');
     if (app) app.style.display = 'block';
+    if (wait) app.style.display = 'none';
+    if (err) err.style.display = 'none';
+}
+
+/**
+ * 認証・情報取得メッセージ表示関数
+ */
+function showWaitContent() {
+    const app = document.getElementById('app-content');
+    const wait = document.getElementById('wait-message');
+    const err = document.getElementById('error-message');
+    if (app) app.style.display = 'none';
+    if (wait) app.style.display = 'block';
     if (err) err.style.display = 'none';
 }
 
@@ -71,8 +88,10 @@ function showMainContent() {
  */
 function showErrorPage() {
     const app = document.getElementById('app-content');
+    const wait = document.getElementById('wait-message');
     const err = document.getElementById('error-message');
     if (app) app.style.display = 'none';
+    if (wait) app.style.display = 'none';
     if (err) err.style.display = 'block';
 }
 
